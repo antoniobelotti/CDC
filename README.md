@@ -60,7 +60,20 @@ into a `datetime` object (using the format specified during `CDC __init__`).
 
 
 + every timestamp can be represented by a datetime object
-+ `CDC` expects the loaded sync data to be represented as a dictionary (log) or as a list of dictionaries (registry)
++ `CDC` expects the loaded sync data to be represented as a dictionary in this format:
+    
+    log strategy
+    `{"timestamp": "2020-11-14 08:43:57"}`
+    
+    registry strategy
+    `{
+      khash: hash,
+      khash: hash,
+      khash: hash,
+      ...
+     }`
+    
+    
 + `DataRow` calculates hash/khash in the `__init__`. The way I implemented it is inefficient and probably the hash calculation
 could be delegated to the `SourceAdapter`. The main problem is that the data dictionary could be nested 
 (schema-less source for example).

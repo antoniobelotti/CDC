@@ -34,21 +34,15 @@ class CDC:
         old_sync_data = self.data_lake.get_sync_data()
         candidate_fresh_rows = self.source.get_target_data()
 
-        def get_hash_from_sync_data(khash):
-            for entry in old_sync_data:
-                if entry.get('key_hash', "") == khash:
-                    return entry
-            return None
-
-        new_sync_data = []
+        new_sync_data = {}
         for fresh_row in candidate_fresh_rows:
-            old_row_hash = get_hash_from_sync_data(fresh_row.key_hash)
-            if old_row_hash is None or old_row_hash['hash'] != fresh_row.hash:
+            old_row_hash = old_sync_data.get(fresh_row.key_hash, None)
+            if old_row_hash is None or old_row_hash != fresh_row.hash:
                 self.data_lake.write_capture_data(fresh_row, self.transactional)
-                new_sync_data.append({'key_hash': fresh_row.key_hash, 'hash': fresh_row.hash})
+                new_sync_data[fresh_row.key_hash] = fresh_row.hash
             elif old_row_hash:
                 # if the data hash exists and it's the same, leave the corresponding sync.json line untouched
-                new_sync_data.append(old_row_hash)
+                new_sync_data[fresh_row.key_hash] = old_row_hash
 
         self.data_lake.write_sync_data(new_sync_data, self.transactional)
 
